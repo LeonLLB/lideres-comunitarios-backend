@@ -79,6 +79,14 @@ func main() {
 	auth := r.Group("/auth")
 	auth.POST("/login", controllers.UserLogin)
 	auth.POST("/register", validateSecretRoutePassword, controllers.RegisterUser)
+	auth.POST("/protected", func(c *gin.Context) {
+		token, err := c.Cookie("x-token")
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"token": token})
+	})
 
 	r.Run(":" + os.Getenv("PORT"))
 }

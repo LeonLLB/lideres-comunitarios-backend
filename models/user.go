@@ -1,14 +1,12 @@
 package models
 
 import (
-	"fmt"
-
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 type Usuario struct {
-	gorm.Model
+	ID       uint   `gorm:"primaryKey"`
 	Cedula   int    `gorm:"unique; not null" json:"cedula"`
 	Password string `gorm:"not null" json:"password"`
 	Rol      string `gorm:"not null;default:S" json:"rol"`
@@ -21,7 +19,7 @@ func (u *Usuario) TableName() string {
 func (u *Usuario) SaveUsuario() (*Usuario, error) {
 
 	err := DB.Create(&u).Error
-	fmt.Print(err.Error())
+
 	if err != nil {
 		return &Usuario{}, err
 	}
@@ -30,7 +28,7 @@ func (u *Usuario) SaveUsuario() (*Usuario, error) {
 
 }
 
-func (u *Usuario) BeforeSave() error {
+func (u *Usuario) BeforeSave(_ *gorm.DB) error {
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -39,4 +37,20 @@ func (u *Usuario) BeforeSave() error {
 	u.Password = string(hashedPassword)
 
 	return nil
+}
+
+func (u *Usuario) FindUsuario() (*Usuario, error) {
+
+	err := DB.Where(&Usuario{ID: u.ID}).Or(&Usuario{Cedula: u.Cedula}).First(&u).Error
+
+	if err != nil {
+		return &Usuario{}, err
+	}
+	return u, err
+
+}
+
+func (u *Usuario) CheckPassword(pass string) error {
+
+	return bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(pass))
 }
