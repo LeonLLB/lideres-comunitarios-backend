@@ -1,15 +1,16 @@
 package models
 
 type Lider struct {
-	ID        uint   `gorm:"primaryKey" json:"id"`
-	Nombre    string `gorm:"not null" json:"nombre"`
-	Apellido  string `gorm:"not null" json:"apellido"`
-	Cedula    uint   `gorm:"not null;unique" json:"cedula"`
-	Apodo     string `gorm:"not null" json:"apodo"`
-	Telefono  string `gorm:"not null" json:"telefono"`
-	Email     string `gorm:"not null" json:"email"`
-	Parroquia string `gorm:"not null" json:"parroquia"`
-	Comunidad string `gorm:"not null" json:"comunidad"`
+	ID         uint       `gorm:"primaryKey" json:"id"`
+	Nombre     string     `gorm:"not null" json:"nombre"`
+	Apellido   string     `gorm:"not null" json:"apellido"`
+	Cedula     uint       `gorm:"not null;unique" json:"cedula"`
+	Apodo      string     `gorm:"not null" json:"apodo"`
+	Telefono   string     `gorm:"not null" json:"telefono"`
+	Email      string     `gorm:"not null" json:"email"`
+	Parroquia  string     `gorm:"not null" json:"parroquia"`
+	Comunidad  string     `gorm:"not null" json:"comunidad"`
+	Seguidores []Seguidor `json:"seguidores"`
 }
 
 func (l *Lider) TableName() string {
@@ -30,7 +31,7 @@ func (l *Lider) SaveLider() (*Lider, error) {
 
 func (l *Lider) FindLider() (*Lider, error) {
 
-	err := DB.Where(&Lider{ID: l.ID}).Or(&Lider{Cedula: l.Cedula}).First(&l).Error
+	err := DB.Where(&Lider{ID: l.ID}).Or(&Lider{Cedula: l.Cedula}).Preload("Seguidores").First(&l).Error
 
 	if err != nil {
 		return &Lider{}, err

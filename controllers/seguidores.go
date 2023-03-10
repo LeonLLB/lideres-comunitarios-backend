@@ -1,16 +1,14 @@
 package controllers
 
 import (
-	"errors"
 	"lideres-comunitarios-backend/models"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-type LiderInput struct {
+type SeguidorInput struct {
 	Nombre    string `binding:"required" json:"nombre"`
 	Apellido  string `binding:"required" json:"apellido"`
 	Cedula    uint   `binding:"required" json:"cedula"`
@@ -19,22 +17,23 @@ type LiderInput struct {
 	Email     string `binding:"required" json:"email"`
 	Parroquia string `binding:"required" json:"parroquia"`
 	Comunidad string `binding:"required" json:"comunidad"`
+	LiderID   uint   `binding:"required" json:"liderId"`
 }
 
-type LiderFiltrado struct {
+type SeguidorFiltrado struct {
 	Parroquia string `form:"parroquia"`
 	Comunidad string `form:"comunidad"`
 }
 
-func CreateLider(c *gin.Context) {
-	var dto LiderInput
+func CreateSeguidor(c *gin.Context) {
+	var dto SeguidorInput
 
 	if err := c.ShouldBindJSON(&dto); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	nLider := models.Lider{
+	nSeguidor := models.Seguidor{
 		Nombre:    dto.Nombre,
 		Apellido:  dto.Apellido,
 		Cedula:    dto.Cedula,
@@ -43,9 +42,10 @@ func CreateLider(c *gin.Context) {
 		Email:     dto.Email,
 		Parroquia: dto.Parroquia,
 		Comunidad: dto.Comunidad,
+		LiderID:   dto.LiderID,
 	}
 
-	cLider, err := nLider.SaveLider()
+	cSeguidor, err := nSeguidor.SaveSeguidor()
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -54,74 +54,11 @@ func CreateLider(c *gin.Context) {
 
 	c.JSON(http.StatusAccepted, gin.H{
 		"status": true,
-		"data":   cLider,
+		"data":   cSeguidor,
 	})
 }
 
-func GetLider(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	lider := models.Lider{
-		ID: uint(id),
-	}
-
-	qLider, err := lider.FindLider()
-
-	if err != nil {
-
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "No existe ese lider"})
-		} else {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		}
-
-		return
-	}
-
-	c.JSON(http.StatusAccepted, gin.H{"data": qLider})
-}
-
-func GetLideres(c *gin.Context) {
-
-	var dto LiderFiltrado
-
-	if err := c.ShouldBindQuery(&dto); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	lider := models.Lider{}
-	lideres, err := lider.FindLideres(models.Lider{Parroquia: dto.Parroquia, Comunidad: dto.Comunidad})
-
-	var errRes gin.H
-	var errCode int
-
-	if err != nil {
-		errRes = gin.H{"error": err.Error()}
-		errCode = http.StatusInternalServerError
-	} else if len(lideres) == 0 {
-		errRes = gin.H{"error": "no hay lideres"}
-		errCode = http.StatusNotFound
-	}
-
-	if err != nil || len(lideres) == 0 {
-		c.AbortWithStatusJSON(errCode, errRes)
-		return
-	}
-
-	c.JSON(http.StatusAccepted, gin.H{
-		"data": lideres,
-	})
-}
-
-func UpdateLider(c *gin.Context) {
+func UpdateSeguidor(c *gin.Context) {
 	id, paramErr := strconv.Atoi(c.Param("id"))
 
 	if paramErr != nil {
@@ -129,13 +66,13 @@ func UpdateLider(c *gin.Context) {
 		return
 	}
 
-	var dto LiderInput
+	var dto SeguidorInput
 	if err := c.ShouldBindJSON(&dto); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	uLider := models.Lider{
+	uSeguidor := models.Seguidor{
 		ID:        uint(id),
 		Nombre:    dto.Nombre,
 		Apellido:  dto.Apellido,
@@ -145,29 +82,30 @@ func UpdateLider(c *gin.Context) {
 		Email:     dto.Email,
 		Parroquia: dto.Parroquia,
 		Comunidad: dto.Comunidad,
+		LiderID:   dto.LiderID,
 	}
 
-	if qErr := uLider.UpdateLider(); qErr != nil {
+	if qErr := uSeguidor.UpdateSeguidor(); qErr != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": qErr.Error()})
 		return
 	}
 
 	c.JSON(http.StatusAccepted, gin.H{
 		"success": true,
-		"data":    uLider,
+		"data":    uSeguidor,
 	})
 
 }
 
-func DeleteLider(c *gin.Context) {
+func DeleteSeguidor(c *gin.Context) {
 	id, paramErr := strconv.Atoi(c.Param("id"))
 	if paramErr != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "ID no valido"})
 		return
 	}
 
-	dLider := models.Lider{ID: uint(id)}
-	rows, err := dLider.DeleteLider()
+	dSeguidor := models.Seguidor{ID: uint(id)}
+	rows, err := dSeguidor.DeleteSeguidor()
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -175,7 +113,7 @@ func DeleteLider(c *gin.Context) {
 	}
 
 	if rows == 0 {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "No existe ese lider"})
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "No existe ese seguidor"})
 	}
 
 	c.Status(http.StatusAccepted)

@@ -22,7 +22,7 @@ func InitDevDatabase() {
 		fmt.Print("Local database connection has been succesful\n")
 	}
 
-	DB.AutoMigrate(&Usuario{}, &Lider{})
+	DB.AutoMigrate(&Usuario{}, &Lider{}, &Seguidor{})
 }
 
 func InitProdDatabase() {
