@@ -21,12 +21,12 @@ func genSecretRoutePassword() string {
 	chars := "abcdefghijklmnopqrstuvwxyz"
 	var rPass string
 	for i := 0; i < 11; i++ {
-		char := strings.Split(chars, "")[rand.Intn(len(chars)+1)]
+		char := strings.Split(chars, "")[rand.Intn(len(chars))]
 		rPass = rPass + char
 	}
 	pass, err := bcrypt.GenerateFromPassword([]byte(rPass), bcrypt.DefaultCost)
 	if err != nil {
-		fmt.Print("Couldn't generate secret password for specific functions")
+		fmt.Print("Couldn't generate secret password for specific functions\n")
 		return ""
 	}
 	secretPassword = string(pass)
@@ -40,18 +40,19 @@ type secretRouteInput struct {
 func validateSecretRoutePassword(c *gin.Context) {
 
 	var input secretRouteInput
-	response := gin.H{"Unauthorized": "This route is meant to bTe used with the proper key"}
+	response := gin.H{"Unauthorized": "This route is meant to be used with the proper key"}
 
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusForbidden, response)
+	if err := c.ShouldBindHeader(&input); err != nil {
+		c.AbortWithStatusJSON(http.StatusForbidden, response)
 		return
 	}
 
 	err := bcrypt.CompareHashAndPassword([]byte(secretPassword), []byte(input.Key))
 	if err != nil {
-		c.JSON(http.StatusForbidden, response)
+		c.AbortWithStatusJSON(http.StatusForbidden, response)
 		return
 	}
+
 	c.Next()
 }
 
@@ -64,7 +65,7 @@ func main() {
 	}
 
 	pass := genSecretRoutePassword()
-	fmt.Printf("SECRET GENERATED PASSWORD %s", pass)
+	fmt.Printf("SECRET GENERATED PASSWORD %s\n", pass)
 
 	if os.Getenv("DEV") == "1" {
 		models.InitDevDatabase()
@@ -77,7 +78,7 @@ func main() {
 
 	auth := r.Group("/auth")
 	auth.POST("/login", controllers.UserLogin)
-	auth.POST("/register", validateSecretRoutePassword)
+	auth.POST("/register", validateSecretRoutePassword, controllers.RegisterUser)
 
 	r.Run(":" + os.Getenv("PORT"))
 }
