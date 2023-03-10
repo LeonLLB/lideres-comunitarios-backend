@@ -26,13 +26,22 @@ type RegisterInput struct {
 	Rol string `json:"rol"`
 }
 
-func UserLogin(c *gin.Context) {
+func setCookie(c *gin.Context, name string, value string) {
 
-	env_err := godotenv.Load(".env")
+	if os.Getenv("DEV") == "" || os.Getenv("DEV") == "1" {
+		env_err := godotenv.Load(".env")
 
-	if env_err != nil {
-		log.Fatal("Cannot load local .env")
+		if env_err != nil {
+			log.Fatal("Cannot load local .env")
+		}
 	}
+
+	domain := os.Getenv("FRONT_DOMAIN")
+
+	c.SetCookie(name, value, 60*60, "/", domain, domain != "localhost", true)
+}
+
+func UserLogin(c *gin.Context) {
 
 	var dto LoginInput
 
@@ -69,9 +78,7 @@ func UserLogin(c *gin.Context) {
 		return
 	}
 
-	domain := os.Getenv("FRONT_DOMAIN")
-
-	c.SetCookie("x-token", token, 60*60, "/", domain, domain != "localhost", true)
+	setCookie(c, "x-token", token)
 
 	c.JSON(http.StatusAccepted, gin.H{"token": token})
 }
@@ -92,6 +99,7 @@ func RegisterUser(c *gin.Context) {
 	}
 
 	cUser, err := nUser.SaveUsuario()
+	cUser.Password = ""
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -100,4 +108,9 @@ func RegisterUser(c *gin.Context) {
 
 	c.JSON(http.StatusAccepted, gin.H{"success": true, "data": cUser})
 
+}
+
+func Logout(c *gin.Context) {
+	setCookie(c, "x-token", "")
+	c.JSON(http.StatusAccepted, gin.H{"success": true})
 }
