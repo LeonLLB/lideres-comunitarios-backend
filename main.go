@@ -6,7 +6,6 @@ import (
 	"lideres-comunitarios-backend/middlewares"
 	"lideres-comunitarios-backend/models"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -37,9 +36,9 @@ func main() {
 	auth.POST("/login", controllers.UserLogin)
 	auth.POST("/register", middlewares.ValidateSecretRoutePassword, controllers.RegisterUser)
 	auth.POST("/logout", controllers.Logout)
-	auth.POST("/protected", middlewares.ValidateToken, middlewares.ValidateIfAdmin, middlewares.RevalidateUsrToken, func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"hello": "We wanted to talk about your cars extended warranty"})
-	})
+	// auth.POST("/protected", middlewares.ValidateToken, middlewares.ValidateIfAdmin, middlewares.RevalidateUsrToken, func(c *gin.Context) {
+	// 	c.JSON(http.StatusOK, gin.H{"hello": "We wanted to talk about your cars extended warranty"})
+	// })
 
 	r.Run(":" + os.Getenv("PORT"))
 }
