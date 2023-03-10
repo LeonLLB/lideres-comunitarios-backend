@@ -19,6 +19,11 @@ type LiderInput struct {
 	Comunidad string `binding:"required" json:"comunidad"`
 }
 
+type LiderFiltrado struct {
+	Parroquia string `form:"parroquia"`
+	Comunidad string `form:"comunidad"`
+}
+
 func CreateLider(c *gin.Context) {
 	var dto LiderInput
 
@@ -52,8 +57,16 @@ func CreateLider(c *gin.Context) {
 }
 
 func GetLideres(c *gin.Context) {
+
+	var dto LiderFiltrado
+
+	if err := c.ShouldBindQuery(&dto); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	lider := models.Lider{}
-	lideres, err := lider.FindLideres()
+	lideres, err := lider.FindLideres(models.Lider{Parroquia: dto.Parroquia, Comunidad: dto.Comunidad})
 
 	var errRes gin.H
 	var errCode int

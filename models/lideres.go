@@ -39,9 +39,9 @@ func (l *Lider) FindLider() (*Lider, error) {
 
 }
 
-func (l *Lider) FindLideres() ([]Lider, error) {
+func (l *Lider) FindLideres(dto Lider) ([]Lider, error) {
 	var lideres []Lider
-	err := DB.Find(&lideres).Error
+	err := DB.Where("parroquia LIKE ? AND comunidad LIKE ?", "%"+dto.Parroquia+"%", "%"+dto.Comunidad+"%").Find(&lideres).Error
 	if err != nil {
 		return []Lider{}, err
 	}
