@@ -42,6 +42,9 @@ func main() {
 
 	lideres := r.Group("/lideres")
 	lideres.POST("/", middlewares.ValidateIfAdmin, middlewares.RevalidateUsrToken, controllers.CreateLider)
+	lideres.GET("/", middlewares.ValidateAnyUser, middlewares.RevalidateUsrToken, controllers.GetLideres)
+	lideres.PUT("/:id", middlewares.ValidateIfAdmin, middlewares.RevalidateUsrToken, controllers.UpdateLider)
+	lideres.DELETE("/:id", middlewares.ValidateIfAdmin, middlewares.RevalidateUsrToken, controllers.DeleteLider)
 
 	r.Run(":" + os.Getenv("PORT"))
 }

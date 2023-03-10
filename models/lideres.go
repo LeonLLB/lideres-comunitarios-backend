@@ -47,3 +47,19 @@ func (l *Lider) FindLideres() ([]Lider, error) {
 	}
 	return lideres, nil
 }
+
+func (l *Lider) UpdateLider() error {
+
+	err := DB.Model(&Lider{}).Where(&Lider{ID: l.ID}).Updates(&l).Error
+
+	return err
+
+}
+
+func (l *Lider) DeleteLider() (int, error) {
+
+	res := DB.Model(&Lider{}).Delete(&l)
+
+	return int(res.RowsAffected), res.Error
+
+}

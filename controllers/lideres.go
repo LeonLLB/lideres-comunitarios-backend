@@ -3,6 +3,7 @@ package controllers
 import (
 	"lideres-comunitarios-backend/models"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -48,4 +49,90 @@ func CreateLider(c *gin.Context) {
 		"status": true,
 		"data":   cLider,
 	})
+}
+
+func GetLideres(c *gin.Context) {
+	lider := models.Lider{}
+	lideres, err := lider.FindLideres()
+
+	var errRes gin.H
+	var errCode int
+
+	if err != nil {
+		errRes = gin.H{"error": err.Error()}
+		errCode = http.StatusInternalServerError
+	} else if len(lideres) == 0 {
+		errRes = gin.H{"error": "no hay lideres"}
+		errCode = http.StatusNotFound
+	}
+
+	if err != nil || len(lideres) == 0 {
+		c.AbortWithStatusJSON(errCode, errRes)
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{
+		"data": lideres,
+	})
+}
+
+func UpdateLider(c *gin.Context) {
+	id, paramErr := strconv.Atoi(c.Param("id"))
+
+	if paramErr != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Id enviada no es valida"})
+		return
+	}
+
+	var dto LiderInput
+	if err := c.ShouldBindJSON(&dto); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	uLider := models.Lider{
+		ID:        uint(id),
+		Nombre:    dto.Nombre,
+		Apellido:  dto.Apellido,
+		Cedula:    dto.Cedula,
+		Apodo:     dto.Apodo,
+		Telefono:  dto.Telefono,
+		Email:     dto.Email,
+		Parroquia: dto.Parroquia,
+		Comunidad: dto.Comunidad,
+	}
+
+	if qErr := uLider.UpdateLider(); qErr != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": qErr.Error()})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{
+		"success": true,
+		"data":    uLider,
+	})
+
+}
+
+func DeleteLider(c *gin.Context) {
+	id, paramErr := strconv.Atoi(c.Param("id"))
+	if paramErr != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "ID no valido"})
+		return
+	}
+
+	dLider := models.Lider{ID: uint(id)}
+	rows, err := dLider.DeleteLider()
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if rows == 0 {
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "No existe ese lider"})
+	}
+
+	c.Status(http.StatusAccepted)
+
 }
