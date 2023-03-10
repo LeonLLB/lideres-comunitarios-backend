@@ -74,3 +74,15 @@ func TokenValid(c *gin.Context) (*jwt.Token, error) {
 	}
 	return token, nil
 }
+
+func RevalidateToken(c *gin.Context) (string, error) {
+	id, err := ExtractTokenID(c)
+	if err != nil {
+		return "", err
+	}
+	tkn, genErr := GenUserJWT(id)
+	if err != nil {
+		return "", err
+	}
+	return tkn, genErr
+}

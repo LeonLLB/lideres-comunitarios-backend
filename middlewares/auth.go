@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"lideres-comunitarios-backend/controllers"
 	"lideres-comunitarios-backend/models"
 	"lideres-comunitarios-backend/utilities"
 	"net/http"
@@ -62,4 +63,14 @@ func ValidateAnyUser(c *gin.Context) {
 	if res := validateUser(c, ""); res {
 		c.Next()
 	}
+}
+
+func RevalidateUsrToken(c *gin.Context) {
+	tkn, err := utilities.RevalidateToken(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	controllers.SetCookie(c, "x-token", tkn)
+	c.Next()
 }

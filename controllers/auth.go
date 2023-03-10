@@ -26,7 +26,7 @@ type RegisterInput struct {
 	Rol string `json:"rol"`
 }
 
-func setCookie(c *gin.Context, name string, value string) {
+func SetCookie(c *gin.Context, name string, value string) {
 
 	if os.Getenv("DEV") == "" || os.Getenv("DEV") == "1" {
 		env_err := godotenv.Load(".env")
@@ -78,7 +78,7 @@ func UserLogin(c *gin.Context) {
 		return
 	}
 
-	setCookie(c, "x-token", token)
+	SetCookie(c, "x-token", token)
 
 	c.JSON(http.StatusAccepted, gin.H{"token": token})
 }
@@ -111,6 +111,6 @@ func RegisterUser(c *gin.Context) {
 }
 
 func Logout(c *gin.Context) {
-	setCookie(c, "x-token", "")
+	SetCookie(c, "x-token", "")
 	c.JSON(http.StatusAccepted, gin.H{"success": true})
 }

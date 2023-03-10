@@ -37,7 +37,7 @@ func main() {
 	auth.POST("/login", controllers.UserLogin)
 	auth.POST("/register", middlewares.ValidateSecretRoutePassword, controllers.RegisterUser)
 	auth.POST("/logout", controllers.Logout)
-	auth.POST("/protected", middlewares.ValidateToken, middlewares.ValidateIfAdmin, func(c *gin.Context) {
+	auth.POST("/protected", middlewares.ValidateToken, middlewares.ValidateIfAdmin, middlewares.RevalidateUsrToken, func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"hello": "We wanted to talk about your cars extended warranty"})
 	})
 
