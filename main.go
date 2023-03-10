@@ -40,5 +40,8 @@ func main() {
 	// 	c.JSON(http.StatusOK, gin.H{"hello": "We wanted to talk about your cars extended warranty"})
 	// })
 
+	lideres := r.Group("/lideres")
+	lideres.POST("/", middlewares.ValidateIfAdmin, middlewares.RevalidateUsrToken, controllers.CreateLider)
+
 	r.Run(":" + os.Getenv("PORT"))
 }
