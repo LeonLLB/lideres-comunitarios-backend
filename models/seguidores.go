@@ -1,6 +1,9 @@
 package models
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type Seguidor struct {
 	ID        uint   `gorm:"primaryKey" json:"id"`
@@ -41,8 +44,10 @@ func (s *Seguidor) UpdateSeguidor() error {
 
 	var lider Lider
 	DB.Find(&lider, &Lider{ID: s.LiderID})
-
-	if lider.ID == s.LiderID {
+	fmt.Print(lider.ID)
+	fmt.Print(s.LiderID)
+	fmt.Print(lider.ID == s.LiderID)
+	if lider.ID != s.LiderID {
 		return errors.New("no such lider exists")
 	}
 
@@ -58,4 +63,13 @@ func (s *Seguidor) DeleteSeguidor() (int, error) {
 
 	return int(res.RowsAffected), res.Error
 
+}
+
+func (s *Seguidor) BuscarSeguidor() error {
+	err := DB.Where(&Seguidor{ID: s.ID}).First(&s).Error
+
+	if err != nil {
+		return err
+	}
+	return nil
 }

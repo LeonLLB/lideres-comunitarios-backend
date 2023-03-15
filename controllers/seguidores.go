@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"errors"
 	"lideres-comunitarios-backend/models"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type SeguidorInput struct {
@@ -56,6 +58,36 @@ func CreateSeguidor(c *gin.Context) {
 		"status": true,
 		"data":   cSeguidor,
 	})
+}
+
+func GetSeguidor(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	seguidor := models.Seguidor{
+		ID: uint(id),
+	}
+
+	qErr := seguidor.BuscarSeguidor()
+
+	if qErr != nil {
+
+		if errors.Is(qErr, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "No existe ese seguidor"})
+		} else {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{"data": seguidor})
 }
 
 func UpdateSeguidor(c *gin.Context) {

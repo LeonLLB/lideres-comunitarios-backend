@@ -114,3 +114,15 @@ func Logout(c *gin.Context) {
 	SetCookie(c, "x-token", "")
 	c.JSON(http.StatusAccepted, gin.H{"success": true})
 }
+
+func GetTokenStatus(c *gin.Context) {
+	id, err := utilities.ExtractTokenID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"id":   id,
+		"auth": true,
+	})
+}
