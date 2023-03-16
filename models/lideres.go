@@ -10,7 +10,7 @@ type Lider struct {
 	Email      string     `gorm:"not null" json:"email"`
 	Parroquia  string     `gorm:"not null" json:"parroquia"`
 	Comunidad  string     `gorm:"not null" json:"comunidad"`
-	Seguidores []Seguidor `json:"seguidores"`
+	Seguidores []Seguidor `json:"seguidores" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 func (l *Lider) TableName() string {
@@ -59,7 +59,9 @@ func (l *Lider) UpdateLider() error {
 
 func (l *Lider) DeleteLider() (int, error) {
 
-	res := DB.Model(&Lider{}).Delete(&l)
+	res := DB.Model(&Lider{}).Where(&Lider{
+		ID: l.ID,
+	}).Delete(&l)
 
 	return int(res.RowsAffected), res.Error
 

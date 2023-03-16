@@ -59,7 +59,9 @@ func (s *Seguidor) UpdateSeguidor() error {
 
 func (s *Seguidor) DeleteSeguidor() (int, error) {
 
-	res := DB.Model(&Seguidor{}).Delete(&s)
+	res := DB.Model(&Seguidor{}).Where(&Seguidor{
+		ID: s.ID,
+	}).Delete(&s)
 
 	return int(res.RowsAffected), res.Error
 

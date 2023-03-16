@@ -25,12 +25,7 @@ func main() {
 	pass := middlewares.GenSecretRoutePassword()
 	fmt.Printf("SECRET GENERATED PASSWORD %s\n", pass)
 
-	if os.Getenv("DEV") == "1" {
-		models.InitDevDatabase()
-	} else {
-		//TODO: CONECTARSE A BASE DE DATOS EN PRODUCCION
-		models.InitProdDatabase()
-	}
+	models.InitDatabase()
 
 	r := gin.Default()
 

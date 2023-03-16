@@ -178,6 +178,6 @@ func DeleteLider(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "No existe ese lider"})
 	}
 
-	c.Status(http.StatusAccepted)
+	c.JSON(http.StatusAccepted, gin.H{"success": true})
 
 }

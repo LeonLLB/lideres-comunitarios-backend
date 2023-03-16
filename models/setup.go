@@ -3,32 +3,41 @@ package models
 import (
 	"fmt"
 	"log"
+	"os"
 
-	"gorm.io/driver/sqlite"
+	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
 
-func InitDevDatabase() {
+func InitDatabase() {
 
+	envErr := godotenv.Load(".env")
+
+	if envErr != nil {
+		log.Fatal("Cannot load local ENV vars")
+	}
+	fmt.Print("Opening production database\n")
+
+	DBHost := os.Getenv("DBHOST")
+	DBUser := os.Getenv("DBUSER")
+	DBPassword := os.Getenv("DBPASSWORD")
+	DBName := os.Getenv("DBNAME")
+	DBPort := os.Getenv("DBPORT")
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=America/Caracas", DBHost, DBUser, DBPassword, DBName, DBPort)
 	var err error
 
-	DB, err = gorm.Open(sqlite.Open("lideres.db"), &gorm.Config{})
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err.Error())
-		panic("Can't open local database\n")
+		panic("Can't open postgres database\n")
 	} else {
-		fmt.Print("Local database connection has been succesful\n")
+		fmt.Print("database connection has been succesful\n")
 	}
-
 	DB.AutoMigrate(&Usuario{}, &Lider{}, &Seguidor{})
-}
-
-func InitProdDatabase() {
-	//TODO: INICIAR BASE DE DATOS DE PRODUCCION
-	fmt.Print("Opening production database\n")
-	InitDevDatabase()
 }
 
 func GetDbInstance() *gorm.DB {

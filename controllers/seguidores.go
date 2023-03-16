@@ -148,6 +148,6 @@ func DeleteSeguidor(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "No existe ese seguidor"})
 	}
 
-	c.Status(http.StatusAccepted)
+	c.JSON(http.StatusAccepted, gin.H{"success": true})
 
 }
