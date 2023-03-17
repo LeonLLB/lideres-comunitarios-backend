@@ -80,7 +80,7 @@ func UserLogin(c *gin.Context) {
 
 	SetCookie(c, "x-token", token)
 
-	c.JSON(http.StatusAccepted, gin.H{"token": token})
+	c.JSON(http.StatusAccepted, gin.H{"token": token, "rol": qUser.Rol})
 }
 
 func RegisterUser(c *gin.Context) {
@@ -121,8 +121,21 @@ func GetTokenStatus(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": err.Error()})
 		return
 	}
+
+	user := models.Usuario{
+		ID: id,
+	}
+
+	qUser, err := user.FindUsuario()
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"id":   id,
+		"rol":  qUser.Rol,
 		"auth": true,
 	})
 }
