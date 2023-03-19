@@ -38,6 +38,7 @@ func SetCookie(c *gin.Context, name string, value string) {
 
 	domain := os.Getenv("FRONT_DOMAIN")
 
+	c.SetSameSite(http.SameSiteNoneMode)
 	c.SetCookie(name, value, 60*60, "/", domain, domain != "localhost", true)
 }
 
